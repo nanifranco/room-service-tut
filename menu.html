@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Room Service | Hotel Tüt</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Avenir+Next+Condensed:wght@400;500;700&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --verde-primario: #5E6E54;
+            --beige-primario: #ECEBDD;
+            --verde-secundario: #4A5A40;
+            --beige-secundario: #F5F2E6;
+            --negro: #1E1E1E;
+            --blanco: #FFFFFF;
+            --acento: #A78A7F;
+            --safe-area: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html {
+            font-size: 16px;
+            height: 100%;
+            touch-action: manipulation;
+        }
+        
+        body {
+            font-family: 'Jost', sans-serif;
+            background-color: var(--beige-primario);
+            color: var(--negro);
+            line-height: 1.6;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            padding: var(--safe-area);
+        }
+        
+        /* Selector de idioma */
+        .language-selector {
+            position: fixed;
+            top: 1.25rem;
+            right: 1.25rem;
+            font-family: 'Avenir Next Condensed', sans-serif;
+            z-index: 1000;
+            animation: fadeIn 0.8s ease-out 0.5s both;
+        }
+
+        .language-selector span {
+            font-size: 0.9rem;
+            color: var(--negro);
+            background: rgba(236, 235, 221, 0.9);
+            padding: 0.3rem 0.75rem;
+            border-radius: 1.25rem;
+            border: 1px dashed var(--verde-primario);
+            font-weight: 500;
+        }
+
+        .language-selector a {
+            text-decoration: none;
+            color: var(--verde-primario);
+            font-weight: 700;
+            margin: 0 0.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .language-selector a.active {
+            color: var(--negro);
+            text-decoration: underline;
+        }
+
+        .language-selector a:hover {
+            color: var(--negro);
+            text-decoration: underline;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem clamp(1rem, 3vw, 2rem);
+            width: 100%;
+            padding-bottom: 120px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 1rem;
+            position: relative;
+            padding-top: 0.5rem;
+        }
+        
+        .hotel-logo {
+            width: clamp(150px, 35vw, 200px);
+            height: auto;
+            object-fit: contain;
+            margin: 0 auto 1rem;
+            display: block;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+        
+        .category-nav {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            position: relative;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding-bottom: 0.5rem;
+        }
+        
+        .category-nav::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .category-nav::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(94, 110, 84, 0.3), transparent);
+        }
+        
+        .category-list {
+            display: flex;
+            gap: 0;
+            list-style: none;
+            position: relative;
+            padding: 0 1rem;
+        }
+        
+        .category-item {
+            position: relative;
+            flex-shrink: 0;
+        }
+        
+        .category-link {
+            display: block;
+            padding: 0.8rem clamp(0.8rem, 2vw, 1.5rem);
+            font-family: 'Avenir Next Condensed', sans-serif;
+            font-weight: 500;
+            font-size: clamp(0.8rem, 3.5vw, 1rem);
+            color: var(--verde-primario);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-decoration: none;
+            position: relative;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        
+        .category-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 3px;
+            background: var(--acento);
+            transition: width 0.3s ease;
+        }
+        
+        .category-link:hover::after,
+        .category-link.active::after {
+            width: 70%;
+        }
+        
+        .category-link.active {
+            font-weight: 700;
+            color: var(--verde-secundario);
+        }
+        
+        .menu-category {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+        
+        .menu-category.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .category-header {
+            text-align: center;
+            margin-bottom: clamp(1.5rem, 5vw, 3rem);
+        }
+        
+        .category-title {
+            font-family: 'Avenir Next Condensed', sans-serif;
+            font-size: clamp(1.5rem, 6vw, 2.2rem);
+            font-weight: 700;
+            color: var(--verde-primario);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .category-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: var(--acento);
+        }
+        
+        .category-subtitle {
+            font-family: 'Jost', sans-serif;
+            font-weight: 300;
+            font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+            color: var(--verde-primario);
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+            gap: clamp(1rem, 3vw, 2rem);
+            width: 100%;
+        }
+        
+        .menu-card {
+            background: var(--blanco);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            border: 1px solid rgba(94, 110, 84, 0.1);
+        }
+        
+        .menu-card:active {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        .card-image {
+            width: 100%;
+            height: clamp(160px, 40vw, 220px);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        
+        .menu-card:active .card-image img {
+            transform: scale(1.03);
+        }
+        
+        .card-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--acento);
+            color: var(--blanco);
+            font-family: 'Avenir Next Condensed', sans-serif;
+            font-weight: 700;
+            font-size: clamp(0.7rem, 3vw, 0.8rem);
+            padding: 0.2rem 0.6rem;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .card-content {
+            padding: clamp(1rem, 3vw, 1.8rem);
+        }
+        
+        .card-title {
+            font-family: 'Avenir Next Condensed', sans-serif;
+            font-size: clamp(1.1rem, 4vw, 1.4rem);
+            font-weight: 700;
+            color: var(--verde-primario);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .card-description {
+            font-family: 'Jost', sans-serif;
+            font-weight: 300;
+            font-size: clamp(0.85rem, 3.5vw, 0.95rem);
+            color: var(--negro);
+            margin-bottom: clamp(1rem, 3vw, 1.5rem);
+            line-height: 1.5;
+        }
+        
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .card-price {
+            font-family: 'Avenir Next Condensed', sans-serif;
+            font-size: clamp(1.1rem, 4vw, 1.3rem);
+            font-weight: 700;
+            color: var(--verde-primario);
+            white-space: nowrap;
+        }
+        
+        .card-button {
+            background: var(--verde-primario);
+            color: var(--blanco);
+            border: none;
+            padding: clamp(0.6rem, 2vw, 0.7rem) clamp(1rem, 3vw, 1.5rem);
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Avenir Next Condensed', sans-serif;
+            font-weight: 500;
+            font-size: clamp(0.8rem, 3.5vw, 0.9rem);
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            flex-grow: 1;
+            text-align: center;
+        }
+        
+        .card-button:active {
+            background: var(--verde-secundario);
+            transform: translateY(1px);
+        }
+        
+        .cart-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--beige-secundario);
+            color: var(--verde-primario);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(94, 110, 84, 0.15);
+            cursor: pointer;
+            z-index: 1001;
+            border: 1px solid rgba(94, 110, 84, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .cart-toggle:hover {
+            background: var(--blanco);
+            box-shadow: 0 6px 16px rgba(94, 110, 84, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .cart-toggle:active {
+            transform: translateY(0);
+        }
+        
+        .cart-icon {
+            width: 24px;
+            height: 24px;
+            stroke-width: 2;
+        }
+        
+        .badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--acento);
+            color: var(--blanco);
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            font-family: 'Avenir Next Condensed', sans-serif;
+            border: 2px solid var(--beige-secundario);
+        }
+        
+        .cart-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--beige-secundario);
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.08);
+            border-top: 1px solid rgba(94, 110, 84, 0.1);
+            z-index: 1000;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            padding: 1.5rem;
+            max-height: 70vh;
+            overflow-y: auto;
+            border-radius: 16px 16px 0 0;
+        }
+        
+        .cart-container.open {
+            transform: translateY(0);
+        }
+        
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(94, 110, 84, 0.1);
+        }
+        
+        .cart-title {
+            font-family: 'Avenir Next Condensed', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--verde-primario);
+            letter-spacing: 0.5px;
+        }
+        
+        .close-cart {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            color: var(--verde-primario);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            line-height: 1;
+        }
+        
+        .close-cart:active {
+            transform: rotate(90deg);
+        }
+        
+        .cart-items {
+            margin-bottom: 1rem;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(94, 110, 84, 0.1);
+        }
+        
+        .cart-item-info {
+            flex-grow: 1;
+        }
+        
+        .cart-item-name {
+            font-family: 'Avenir Next Condensed', sans-serif;
+            font-weight: 500;
+            color: var(--verde-primario);
+        }
+        
+        .cart-item-price {
+            font-family: 'Jost', sans-serif;
+            font-size: 0.9rem;
+            color: var(--negro);
+        }
+        
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .quantity-btn {
+            background: var(--beige-primario);
+            border: 1px solid rgba(94, 110, 84, 0.2);
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .quantity-value {
+            min-width: 20px;
+            text-align: center;
+        }
+        
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Avenir Next Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--verde-primario);
+            padding: 1rem 0;
+            border-top: 1px solid rgba(94, 110, 84, 0.1);
+        }
+        
+        .checkout-btn {
+            background: var(--verde-primario);
+            color: var(--blanco);
+            border: none;
+            padding: 0.8rem;
+            border-radius: 5px;
+            width: 100%;
+            font-family: 'Avenir Next Condensed', sans-serif;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .checkout-btn:active {
+            background: var(--verde-secundario);
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 1rem;
+            color: var(--verde-primario);
+        }
+        
+        .special-instructions {
+            margin-top: 1rem;
+        }
+        
+        .instructions-textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid rgba(94, 110, 84, 0.3);
+            border-radius: 5px;
+            font-family: 'Jost', sans-serif;
+            resize: none;
+            margin-top: 0.5rem;
+        }
+        
+        .instructions-label {
+            font-family: 'Avenir Next Condensed', sans-serif;
+            font-weight: 500;
+            color: var(--verde-primario);
+        }
+        
+        @media (max-width: 360px) {
+            .category-list {
+                padding: 0 0.5rem;
+            }
+            
+            .category-link {
+                padding: 0.6rem 0.8rem;
+            }
+            
+            .card-content {
+                padding: 0.8rem;
+            }
+            
+            .cart-toggle {
+                width: 52px;
+                height: 52px;
+                bottom: 15px;
+                right: 15px;
+            }
+            
+            .cart-icon {
+                width: 22px;
+                height: 22px;
+            }
+            
+            .badge {
+                width: 20px;
+                height: 20px;
+                font-size: 0.65rem;
+            }
+        }
+        
+        @supports (-webkit-touch-callout: none) {
+            body {
+                min-height: -webkit-fill-available;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Selector de idioma -->
+    <div class="language-selector">
+        <span>
+            <a href="#" id="esLang" class="active" onclick="setLanguage('es')">ES</a> | 
+            <a href="#" id="enLang" onclick="setLanguage('en')">EN</a>
+        </span>
+    </div>
+
+    <div class="container">
+        <header>
+            <img src="https://i.postimg.cc/8km20bHQ/Personajes16.png" alt="Hotel Tüt Logo" class="hotel-logo">
+        </header>
+
+        <!-- Navegación por categorías -->
+        <nav class="category-nav">
+            <ul class="category-list">
+                <li class="category-item">
+                    <a href="#desayunos" class="category-link active" onclick="showCategory('desayunos')">Desayunos</a>
+                </li>
+                <li class="category-item">
+                    <a href="#comidas" class="category-link" onclick="showCategory('comidas')">Comidas</a>
+                </li>
+                <li class="category-item">
+                    <a href="#bebidas" class="category-link" onclick="showCategory('bebidas')">Bebidas</a>
+                </li>
+                <li class="category-item">
+                    <a href="#snacks" class="category-link" onclick="showCategory('snacks')">Snacks</a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Categoría Desayunos -->
+        <section id="desayunos" class="menu-category active">
+            <div class="category-header">
+                <h2 class="category-title">Desayunos</h2>
+                <p class="category-subtitle">Empieza tu día con nuestras deliciosas opciones de desayuno</p>
+            </div>
+            
+            <div class="menu-grid">
+                <article class="menu-card">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1550583724-b2692b85b150?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Desayuno Continental">
+                        <span class="card-badge">Popular</span>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Desayuno Continental</h3>
+                        <p class="card-description">Pan fresco, mermeladas, mantequilla, jugo de naranja natural, café o té y fruta de temporada.</p>
+                        <div class="card-footer">
+                            <span class="card-price">$12.50</span>
+                            <button class="card-button" onclick="addToCart('Desayuno Continental', 12.50)">Añadir</button>
+                        </div>
+                    </div>
+                </article>
+                
+                <article class="menu-card">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1484723091739-30a097e8f929?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Panqueques con Frutas">
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Panqueques con Frutas</h3>
+                        <p class="card-description">Panqueques esponjosos con miel de maple, frutas frescas y crema batida. Acompañado de café o té.</p>
+                        <div class="card-footer">
+                            <span class="card-price">$14.00</span>
+                            <button class="card-button" onclick="addToCart('Panqueques con Frutas', 14.00)">Añadir</button>
+                        </div>
+                    </div>
+                </article>
+                
+                <article class="menu-card">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Huevos Benedictinos">
+                        <span class="card-badge">Especial</span>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Huevos Benedictinos</h3>
+                        <p class="card-description">Huevos pochados sobre muffin inglés con jamón, cubiertos con salsa holandesa y acompañados de papas rostizadas.</p>
+                        <div class="card-footer">
+                            <span class="card-price">$15.50</span>
+                            <button class="card-button" onclick="addToCart('Huevos Benedictinos', 15.50)">Añadir</button>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Categoría Comidas -->
+        <section id="comidas" class="menu-category">
+            <div class="category-header">
+                <h2 class="category-title">Comidas</h2>
+                <p class="category-subtitle">Platos principales para disfrutar en la comodidad de tu habitación</p>
+            </div>
+            
+            <div class="menu-grid">
+                <article class="menu-card">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1544025162-d76694265947?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Sandwich Club">
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Sandwich Club</h3>
+                        <p class="card-description">Pollo, tocino, lechuga, tomate y mayonesa en pan de masa madre tostado. Acompañado de papas fritas.</p>
+                        <div class="card-footer">
+                            <span class="card-price">$13.00</span>
+                            <button class="card-button" onclick="addToCart('Sandwich Club', 13.00)">Añadir</button>
+                        </div>
+                    </div>
+                </article>
+                
+                <article class="menu-card">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1559847844-5315695dadae?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Ensalada César">
+                        <span class="card-badge">Recomendado</span>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Ensalada César</h3>
+                        <p class="card-description">Lechuga romana, croutons, queso parmesano y aderezo césar. Opción con pollo grillé (+$3.00).</p>
+                        <div class="card-footer">
+                            <span class="card-price">$10.50</span>
+                            <button class="card-button" onclick="addToCart('Ensalada César', 10.50)">Añadir</button>
+                        </div>
+                    </div>
+                </article>
+                
+                <article class="menu-card">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Pasta Alfredo">
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Pasta Alfredo</h3>
+                        <p class="card-description">Fettuccine con salsa cremosa de queso parmesano, ajo y perejil. Opción con pollo o champiñones (+$4.00).</p>
+                        <div class="card-footer">
+                            <span class="card-price">$14.50</span>
+                            <button class="card-button" onclick="addToCart('Pasta Alfredo', 14.50)">Añadir</button>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Categoría Bebidas -->
+        <section id="bebidas" class="menu-category">
+            <div class="category-header">
+                <h2 class="category-title">Bebidas</h2>
+                <p class="category-subtitle">Refrescantes opciones para acompañar tu comida o disfrutar en cualquier momento</p>
+            </div>
+            
+            <div class="menu-grid">
+                <article class="menu-card">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Café Latte">
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Café Latte</h3>
+                        <p class="card-description">Espresso suave con leche vaporizada y una ligera capa de espuma. Disponible también en versión helada.</p>
+                        <div class="card-footer">
+                            <span class="card-price">$4.50</span>
+                            <button class="card-button" onclick="addToCart('Café Latte', 4.50)">Añadir</button>
+                        </div>
+                    </div>
+                </article>
+                
+                <article class="menu-card">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1561047029-3000c68339ca?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Té Helado">
+                        <span class="card-badge">Nuevo</span>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Té Helado</h3>
+                        <p class="card-description">Té negro infusionado con notas cítricas y un toque de miel. Una opción refrescante sin cafeína.</p>
+                        <div class="card-footer">
+                            <span class="card-price">$3.50</span>
+                            <button class="card-button" onclick="addToCart('Té Helado', 3.50)">Añadir</button>
+                        </div>
+                    </div>
+                </article>
+                
+                <article class="menu-card">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1551269901-5c5e14c25df7?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Jugo Natural">
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Jugo Natural</h3>
+                        <p class="card-description">Jugo recién exprimido de naranja, manzana o zanahoria. Pregunta por los sabores del día.</p>
+                        <div class="card-footer">
+                            <span class="card-price">$5.00</span>
+                            <button class="card-button" onclick="addToCart('Jugo Natural', 5.00)">Añadir</button>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Categoría Snacks -->
+        <section id="snacks" class="menu-category">
+            <div class="category-header">
+                <h2 class="category-title">Snacks</h2>
+                <p class="category-subtitle">Pequeños bocados para satisfacer tu antojo</p>
+            </div>
+            
+            <div class="menu-grid">
+                <article class="menu-card">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1601050690597-df0568f70950?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Croissant">
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Croissant</h3>
+                        <p class="card-description">Clásico croissant francés horneado diariamente. Disponible simple, con mantequilla o mermelada.</p>
+                        <div class="card-footer">
+                            <span class="card-price">$3.50</span>
+                            <button class="card-button" onclick="addToCart('Croissant', 3.50)">Añadir</button>
+                        </div>
+                    </div>
+                </article>
+                
+                <article class="menu-card">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1563805042-7684c019e1cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Porción de Tarta">
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Porción de Tarta</h3>
+                        <p class="card-description">Deliciosa tarta con tres texturas de chocolate belga o cheesecake con frutos rojos. Pregunta por los sabores disponibles.</p>
+                        <div class="card-footer">
+                            <span class="card-price">$6.00</span>
+                            <button class="card-button" onclick="addToCart('Porción de Tarta', 6.00)">Añadir</button>
+                        </div>
+                    </div>
+                </article>
+                
+                <article class="menu-card">
+                    <div class="card-image">
+                        <img src="https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Galletas Artesanales">
+                        <span class="card-badge">Popular</span>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Galletas Artesanales</h3>
+                        <p class="card-description">Galletas caseras con chispas de chocolate y nuez pecana. Horneadas diariamente.</p>
+                        <div class="card-footer">
+                            <span class="card-price">$4.50 (3 unid.)</span>
+                            <button class="card-button" onclick="addToCart('Galletas Artesanales', 4.50)">Añadir</button>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </div>
+
+    <!-- Botón flotante del carrito -->
+    <button class="cart-toggle" onclick="toggleCart()">
+        <svg class="cart-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 2L3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6L18 2H6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 6H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 10C16 11.0609 15.5786 12.0783 14.8284 12.8284C14.0783 13.5786 13.0609 14 12 14C10.9391 14 9.92172 13.5786 9.17157 12.8284C8.42143 12.0783 8 11.0609 8 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="badge" id="cart-count">0</span>
+    </button>
+
+    <!-- Carrito de compras -->
+    <div class="cart-container" id="cart">
+        <div class="cart-header">
+            <h3 class="cart-title">Tu Pedido</h3>
+            <button class="close-cart" onclick="toggleCart()">&times;</button>
+        </div>
+        <div class="cart-items" id="cart-items">
+            <div class="empty-cart">Tu carrito está vacío</div>
+        </div>
+        <div class="special-instructions">
+            <label class="instructions-label">Instrucciones especiales:</label>
+            <textarea class="instructions-textarea" id="instructions" placeholder="Ej: Sin cebolla, entrega antes de las 10am, etc."></textarea>
+        </div>
+        <div class="cart-total">
+            <span>Total:</span>
+            <span id="cart-total">$0.00</span>
+        </div>
+        <button class="checkout-btn" onclick="checkout()">Enviar Pedido</button>
+    </div>
+
+    <script>
+        // Variables globales
+        let cart = [];
+        let cartOpen = false;
+        
+        // Textos en diferentes idiomas
+        const translations = {
+            es: {
+                // Categorías
+                desayunos: "Desayunos",
+                comidas: "Comidas",
+                bebidas: "Bebidas",
+                snacks: "Snacks",
+                
+                // Subtítulos
+                subtitleDesayunos: "Empieza tu día con nuestras deliciosas opciones de desayuno",
+                subtitleComidas: "Platos principales para disfrutar en la comodidad de tu habitación",
+                subtitleBebidas: "Refrescantes opciones para acompañar tu comida o disfrutar en cualquier momento",
+                subtitleSnacks: "Pequeños bocados para satisfacer tu antojo",
+                
+                // Carrito
+                cartTitle: "Tu Pedido",
+                emptyCart: "Tu carrito está vacío",
+                instructionsPlaceholder: "Ej: Sin cebolla, entrega antes de las 10am, etc.",
+                total: "Total:",
+                checkout: "Enviar Pedido",
+                addedFeedback: "✓ Añadido",
+                addButton: "Añadir",
+                confirmCheckout: "¿Confirmar pedido?"
+            },
+            en: {
+                // Categorías
+                desayunos: "Breakfast",
+                comidas: "Meals",
+                bebidas: "Drinks",
+                snacks: "Snacks",
+                
+                // Subtítulos
+                subtitleDesayunos: "Start your day with our delicious breakfast options",
+                subtitleComidas: "Main dishes to enjoy in the comfort of your room",
+                subtitleBebidas: "Refreshing options to accompany your meal or enjoy at any time",
+                subtitleSnacks: "Small bites to satisfy your craving",
+                
+                // Carrito
+                cartTitle: "Your Order",
+                emptyCart: "Your cart is empty",
+                instructionsPlaceholder: "Ex: No onions, deliver before 10am, etc.",
+                total: "Total:",
+                checkout: "Send Order",
+                addedFeedback: "✓ Added",
+                addButton: "Add",
+                confirmCheckout: "Confirm order?"
+            }
+        };
+
+        // Establecer idioma por defecto
+        let currentLanguage = localStorage.getItem('selectedLanguage') || 'es';
+
+        // Función para cambiar idioma
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('selectedLanguage', lang);
+            
+            // Actualizar textos de categorías
+            document.querySelectorAll('.category-link').forEach((link, index) => {
+                const categories = ['desayunos', 'comidas', 'bebidas', 'snacks'];
+                link.textContent = translations[lang][categories[index]];
+            });
+            
+            // Actualizar títulos y subtítulos de categorías
+            document.querySelectorAll('.category-title').forEach((title, index) => {
+                const categories = ['desayunos', 'comidas', 'bebidas', 'snacks'];
+                title.textContent = translations[lang][categories[index]];
+            });
+            
+            document.querySelectorAll('.category-subtitle').forEach((subtitle, index) => {
+                const subtitles = ['subtitleDesayunos', 'subtitleComidas', 'subtitleBebidas', 'subtitleSnacks'];
+                subtitle.textContent = translations[lang][subtitles[index]];
+            });
+            
+            // Actualizar textos del carrito
+            document.querySelector('.cart-title').textContent = translations[lang].cartTitle;
+            document.querySelector('.instructions-textarea').placeholder = translations[lang].instructionsPlaceholder;
+            document.querySelector('.cart-total span:first-child').textContent = translations[lang].total;
+            document.querySelector('.checkout-btn').textContent = translations[lang].checkout;
+            
+            // Actualizar botones "Añadir"
+            document.querySelectorAll('.card-button').forEach(button => {
+                button.textContent = translations[lang].addButton;
+            });
+            
+            // Actualizar clases activas
+            document.getElementById('esLang').classList.toggle('active', lang === 'es');
+            document.getElementById('enLang').classList.toggle('active', lang === 'en');
+            
+            // Cambiar atributo lang del documento
+            document.documentElement.lang = lang;
+            
+            // Actualizar carrito si está abierto
+            if (cartOpen) {
+                updateCart();
+            }
+        }
+
+        // Mostrar/ocultar categorías
+        function showCategory(categoryId) {
+            // Ocultar todas las categorías
+            document.querySelectorAll('.menu-category').forEach(category => {
+                category.classList.remove('active');
+            });
+            
+            // Desactivar todos los enlaces
+            document.querySelectorAll('.category-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Mostrar la categoría seleccionada
+            document.getElementById(categoryId).classList.add('active');
+            
+            // Activar el enlace seleccionado
+            event.currentTarget.classList.add('active');
+            
+            // Prevenir el comportamiento predeterminado del enlace
+            event.preventDefault();
+        }
+
+        // Función para añadir productos al carrito
+        function addToCart(name, price) {
+            // Buscar si el producto ya está en el carrito
+            const existingItem = cart.find(item => item.name === name);
+            
+            if (existingItem) {
+                // Si ya existe, incrementar la cantidad
+                existingItem.quantity += 1;
+            } else {
+                // Si no existe, agregarlo al carrito
+                cart.push({
+                    name: name,
+                    price: price,
+                    quantity: 1
+                });
+            }
+            
+            // Actualizar el carrito
+            updateCart();
+            
+            // Mostrar el carrito si está cerrado
+            if (!cartOpen) {
+                toggleCart();
+            }
+            
+            // Mostrar feedback visual
+            const button = event.target;
+            button.textContent = translations[currentLanguage].addedFeedback;
+            button.style.backgroundColor = '#4A5A40';
+            
+            setTimeout(() => {
+                button.textContent = translations[currentLanguage].addButton;
+                button.style.backgroundColor = '';
+            }, 1000);
+        }
+
+        // Función para actualizar la visualización del carrito
+        function updateCart() {
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartCount = document.getElementById('cart-count');
+            const cartTotal = document.getElementById('cart-total');
+            
+            // Actualizar contador
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCount.textContent = totalItems;
+            
+            // Actualizar lista de items
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = `<div class="empty-cart">${translations[currentLanguage].emptyCart}</div>`;
+                cartTotal.textContent = '$0.00';
+                return;
+            }
+            
+            cartItemsContainer.innerHTML = '';
+            let total = 0;
+            
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                
+                const itemElement = document.createElement('div');
+                itemElement.className = 'cart-item';
+                itemElement.innerHTML = `
+                    <div class="cart-item-info">
+                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-price">$${item.price.toFixed(2)} c/u</div>
+                    </div>
+                    <div class="cart-item-quantity">
+                        <button class="quantity-btn" onclick="changeQuantity(${index}, -1)">-</button>
+                        <span class="quantity-value">${item.quantity}</span>
+                        <button class="quantity-btn" onclick="changeQuantity(${index}, 1)">+</button>
+                    </div>
+                `;
+                
+                cartItemsContainer.appendChild(itemElement);
+            });
+            
+            // Actualizar total
+            cartTotal.textContent = `$${total.toFixed(2)}`;
+        }
+
+        // Función para cambiar la cantidad de un item
+        function changeQuantity(index, change) {
+            const item = cart[index];
+            item.quantity += change;
+            
+            // Eliminar item si la cantidad llega a 0
+            if (item.quantity <= 0) {
+                cart.splice(index, 1);
+            }
+            
+            updateCart();
+        }
+
+        // Función para mostrar/ocultar el carrito
+        function toggleCart() {
+            const cartContainer = document.getElementById('cart');
+            cartOpen = !cartOpen;
+            
+            if (cartOpen) {
+                cartContainer.classList.add('open');
+            } else {
+                cartContainer.classList.remove('open');
+            }
+        }
+
+        // Función para finalizar el pedido
+        function checkout() {
+            if (cart.length === 0) {
+                alert(translations[currentLanguage].emptyCart);
+                return;
+            }
+            
+            // Obtener instrucciones especiales
+            const instructions = document.getElementById('instructions').value;
+            
+            
+            // Guardar en localStorage con las claves que checkout.html espera
+            localStorage.setItem('currentCart', JSON.stringify(cart));
+            localStorage.setItem('cartTotal', calculateTotal().toFixed(2));
+            localStorage.setItem('orderInstructions', instructions);
+            localStorage.setItem('selectedLanguage', currentLanguage);
+            
+            // Redirigir a la página de checkout
+            window.location.href = 'checkout.html?lang=' + currentLanguage;
+        }
+
+        // Función para calcular el total
+        function calculateTotal() {
+            return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        }
+
+        // Aplicar idioma al cargar
+        document.addEventListener('DOMContentLoaded', () => {
+            setLanguage(currentLanguage);
+        });
+
+        // Mejorar la experiencia táctil
+        document.addEventListener('touchstart', function() {}, {passive: true});
+        
+        // Evitar zoom con doble toque
+        document.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+    </script>
+</body>
+</html>

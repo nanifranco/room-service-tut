@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="HandheldFriendly" content="true">
+    <title>Checkout | Hotel Tüt</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Avenir+Next+Condensed:wght@400;500;700&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        :root {
+            --verde-primario: #5E6E54;
+            --beige-primario: #ECEBDD;
+            --verde-secundario: #4A5A40;
+            --beige-secundario: #F5F2E6;
+            --negro: #1E1E1E;
+            --blanco: #FFFFFF;
+            --acento: #A78A7F;
+            --safe-area: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        html {
+            font-size: 16px;
+            height: 100%;
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        body {
+            font-family: 'Jost', sans-serif;
+            background-color: var(--beige-primario);
+            color: var(--negro);
+            line-height: 1.6;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            padding: var(--safe-area);
+            overscroll-behavior-y: contain;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1rem clamp(1rem, 3vw, 1.5rem);
+            width: 100%;
+            min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-top: 0.5rem;
+        }
+        
+        .language-selector {
+            font-family: 'Avenir Next Condensed', sans-serif;
+        }
+        
+        .language-selector span {
+            font-size: 0.9rem;
+            color: var(--negro);
+            background: rgba(236, 235, 221, 0.9);
+            padding: 0.3rem 0.75rem;
+            border-radius: 1.25rem;
+            border: 1px dashed var(--verde-primario);
+            font-weight: 500;
+        }
+        
+        .language-selector a {
+            text-decoration: none;
+            color: var(--verde-primario);
+            font-weight: 700;
+            margin: 0 0.25rem;
+            transition: all 0.2s ease;
+        }
+        
+        .language-selector a.active {
+            color: var(--negro);
+            text-decoration: underline;
+        }
+        
+        .language-selector a:hover {
+            color: var(--negro);
+            text-decoration: underline;
+        }
+        
+        .checkout-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .checkout-title {
+            font-family: 'Avenir Next Condensed', sans-serif;
+            font-size: clamp(1.8rem, 6vw, 2.2rem);
+            font-weight: 700;
+            color: var(--verde-primario);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+        }
+        
+        .checkout-title::after {
+            content: '';
+            display: block;
+            width: 3rem;
+            height: 3px;
+            background: var(--acento);
+            margin: 0.5rem auto;
+            border-radius: 3px;
+        }
+        
+        .checkout-subtitle {
+            font-family: 'Jost', sans-serif;
+            font-weight: 300;
+            font-size: clamp(1rem, 3.5vw, 1.1rem);
+            color: var(--verde-primario);
+        }
+        
+        .order-summary {
+            background: var(--blanco);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0.5rem 1.5rem rgba(94, 110, 84, 0.15);
+            border: 1px dashed rgba(94, 110, 84, 0.2);
+        }
+        
+        .order-summary-title {
+            font-family: 'Avenir Next Condensed', sans-serif;
+            font-size: clamp(1.1rem, 4vw, 1.3rem);
+            font-weight: 700;
+            color: var(--verde-primario);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(94, 110, 84, 0.1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .order-items {
+            margin-bottom: 1.25rem;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-size: clamp(0.9rem, 3.5vw, 1rem);
+        }
+        
+        .order-item-name {
+            font-family: 'Jost', sans-serif;
+            font-weight: 400;
+        }
+        
+        .order-item-quantity {
+            color: var(--acento);
+            font-weight: 500;
+        }
+        
+        .order-item-price {
+            font-family: 'Avenir Next Condensed', sans-serif;
+            font-weight: 500;
+        }
+        
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'Avenir Next Condensed', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.1rem, 4vw, 1.3rem);
+            padding-top: 1rem;
+            border-top: 1px solid rgba(94, 110, 84, 0.1);
+        }
+        
+        .payment-methods {
+            background: var(--blanco);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0.5rem 1.5rem rgba(94, 110, 84, 0.15);
+            border: 1px dashed rgba(94, 110, 84, 0.2);
+        }
+        
+        .payment-methods-title {
+            font-family: 'Avenir Next Condensed', sans-serif;
+            font-size: clamp(1.1rem, 4vw, 1.3rem);
+            font-weight: 700;
+            color: var(--verde-primario);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .payment-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px dashed var(--verde-primario);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            -webkit-user-select: none;
+            user-select: none;
+            background-color: rgba(236, 235, 221, 0.3);
+        }
+        
+        .payment-option:active {
+            transform: scale(0.98);
+        }
+        
+        .payment-option:hover {
+            border-color: var(--acento);
+        }
+        
+        .payment-option.selected {
+            border-color: var(--verde-primario);
+            background-color: rgba(94, 110, 84, 0.05);
+        }
+        
+        .payment-option input {
+            margin-right: 0.75rem;
+            min-width: 18px;
+            min-height: 18px;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .payment-option-label {
+            font-family: 'Avenir Next Condensed', sans-serif;
+            font-weight: 500;
+            flex-grow: 1;
+            font-size: clamp(0.95rem, 3.5vw, 1.05rem);
+        }
+        
+        .payment-icon {
+            width: 26px;
+            height: 26px;
+            margin-right: 0.75rem;
+        }
+        
+        .payment-details {
+            margin-top: 1.25rem;
+            display: none;
+        }
+        
+        .payment-details.active {
+            display: block;
+        }
+        
+        .card-element {
+            background: var(--beige-primario);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 16px !important;
+            border: 1px dashed var(--verde-primario);
+        }
+        
+        .StripeElement {
+            min-height: 40px;
+            padding: 10px 12px;
+        }
+        
+        .button {
+            background: var(--verde-primario);
+            color: var(--blanco);
+            border: none;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            width: 100%;
+            font-family: 'Avenir Next Condensed', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1rem, 4vw, 1.1rem);
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+            -webkit-appearance: none;
+            -webkit-user-select: none;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .button:active {
+            transform: translateY(1px);
+        }
+        
+        .button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .button:not(:disabled):hover {
+            background: var(--verde-secundario);
+            box-shadow: 0 4px 12px rgba(94, 110, 84, 0.3);
+        }
+        
+        .pay-button {
+            background: var(--verde-primario);
+        }
+        
+        .back-button {
+            background: var(--beige-secundario);
+            color: var(--verde-primario);
+            border: 1px dashed var(--verde-primario);
+        }
+        
+        .cash-button {
+            background: var(--acento);
+            color: var(--blanco);
+            display: none;
+        }
+        
+        .cash-button.active {
+            display: flex;
+        }
+        
+        .back-button:active {
+            background: rgba(94, 110, 84, 0.1);
+        }
+        
+        .button-row {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .button-row .button {
+            margin-top: 0;
+            flex: 1;
+        }
+        
+        #card-errors {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            min-height: 1.2rem;
+            font-weight: 500;
+        }
+        
+        .special-instructions {
+            margin-top: 1rem;
+            background: var(--blanco);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0.5rem 1.5rem rgba(94, 110, 84, 0.15);
+            border: 1px dashed rgba(94, 110, 84, 0.2);
+        }
+        
+        .instructions-label {
+            font-family: 'Avenir Next Condensed', sans-serif;
+            font-weight: 500;
+            color: var(--verde-primario);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .instructions-text {
+            font-family: 'Jost', sans-serif;
+            font-size: 0.95rem;
+            color: var(--negro);
+            padding: 0.5rem;
+            background: var(--beige-primario);
+            border-radius: 0.5rem;
+            border: 1px dashed var(--verde-primario);
+        }
+        
+        /* Mejoras para dispositivos pequeños */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0.75rem;
+            }
+            
+            .order-summary, .payment-methods, .special-instructions {
+                padding: 1.25rem;
+            }
+            
+            .payment-option {
+                padding: 0.9rem;
+            }
+            
+            .button {
+                padding: 0.9rem;
+            }
+            
+            .button-row {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+        }
+        
+        /* Soporte para iOS */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                min-height: -webkit-fill-available;
+            }
+            
+            input, button {
+                -webkit-appearance: none;
+                border-radius: 0;
+            }
+            
+            .button {
+                -webkit-tap-highlight-color: rgba(0,0,0,0);
+            }
+        }
+        
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .container {
+            animation: fadeIn 0.8s ease-out both;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-container">
+            <div class="language-selector">
+                <span><a href="#" id="esLang" class="active" onclick="setLanguage('es')">ES</a> | <a href="#" id="enLang" onclick="setLanguage('en')">EN</a></span>
+            </div>
+        </div>
+        
+        <header class="checkout-header">
+            <h1 class="checkout-title" id="checkout-title">Finalizar Pedido</h1>
+            <p class="checkout-subtitle" id="checkout-subtitle">Selecciona tu método de pago</p>
+        </header>
+        
+        <section class="order-summary">
+            <h2 class="order-summary-title" id="order-summary-title">Resumen del Pedido</h2>
+            <div class="order-items" id="order-items">
+                <!-- Los items del pedido se agregarán aquí dinámicamente -->
+            </div>
+            <div class="order-total">
+                <span id="total-label">Total:</span>
+                <span id="order-total">$0.00</span>
+            </div>
+        </section>
+        
+        <section class="special-instructions">
+            <label class="instructions-label">Instrucciones especiales:</label>
+            <div class="instructions-text" id="order-instructions">
+                <!-- Las instrucciones se cargarán aquí -->
+            </div>
+        </section>
+        
+        <section class="payment-methods">
+            <h2 class="payment-methods-title" id="payment-methods-title">Método de Pago</h2>
+            
+            <label class="payment-option" for="cash-method">
+                <input type="radio" name="payment-method" id="cash-method" checked>
+                <span class="payment-option-label" id="cash-label">Efectivo al recoger</span>
+            </label>
+            
+            <label class="payment-option" for="card-method">
+                <input type="radio" name="payment-method" id="card-method">
+                <span class="payment-option-label" id="card-label">Tarjeta de crédito/débito</span>
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/stripe/stripe-original.svg" class="payment-icon" alt="Stripe">
+            </label>
+            
+            <div class="payment-details" id="card-details">
+                <div class="card-element" id="card-element">
+                    <!-- Stripe Card Element se insertará aquí -->
+                </div>
+                <div id="card-errors" role="alert"></div>
+                
+                <button class="button pay-button" id="pay-button" disabled>
+                    <span id="pay-button-text">Pagar con Tarjeta</span>
+                    <span id="pay-button-loading" style="display:none;">
+                        <i class="fas fa-spinner fa-spin"></i> <span id="processing-text">Procesando...</span>
+                    </span>
+                </button>
+            </div>
+        </section>
+        
+        <div class="button-row">
+            <button class="button back-button" onclick="window.location.href='menu.html'" id="back-button">
+                <i class="fas fa-arrow-left"></i> <span>Volver al Menú</span>
+            </button>
+            <button class="button cash-button" id="cash-button">
+                <i class="fas fa-money-bill-wave"></i> <span id="pay-cash-text">Pagar en Efectivo</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let cart = [];
+        let total = 0;
+        let stripe = null;
+        let cardElement = null;
+        let currentLanguage = localStorage.getItem('selectedLanguage') || 'es';
+        
+        // Textos en diferentes idiomas
+        const translations = {
+            es: {
+                "checkout-title": "Finalizar Pedido",
+                "checkout-subtitle": "Selecciona tu método de pago",
+                "order-summary-title": "Resumen del Pedido",
+                "total-label": "Total:",
+                "payment-methods-title": "Método de Pago",
+                "cash-label": "Efectivo al recoger",
+                "card-label": "Tarjeta de crédito/débito",
+                "pay-button-text": "Pagar con Tarjeta",
+                "pay-cash-text": "Pagar en Efectivo",
+                "back-button": "Volver al Menú",
+                "processing": "Procesando...",
+                "payment-success": "Pago exitoso! Gracias por tu compra.",
+                "payment-error": "Hubo un error procesando tu pago. Intenta nuevamente.",
+                "instructions-label": "Instrucciones especiales:",
+                "no-instructions": "No hay instrucciones especiales",
+                "empty-cart": "No hay items en el carrito"
+            },
+            en: {
+                "checkout-title": "Checkout",
+                "checkout-subtitle": "Select your payment method",
+                "order-summary-title": "Order Summary",
+                "total-label": "Total:",
+                "payment-methods-title": "Payment Method",
+                "cash-label": "Cash on pickup",
+                "card-label": "Credit/Debit Card",
+                "pay-button-text": "Pay with Card",
+                "pay-cash-text": "Pay with Cash",
+                "back-button": "Back to Menu",
+                "processing": "Processing...",
+                "payment-success": "Payment successful! Thank you for your purchase.",
+                "payment-error": "There was an error processing your payment. Please try again.",
+                "instructions-label": "Special instructions:",
+                "no-instructions": "No special instructions",
+                "empty-cart": "No items in cart"
+            }
+        };
+        
+        // Inicializar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar el carrito desde localStorage
+            loadCart();
+            
+            // Configurar Stripe (reemplaza 'pk_test_your_key' con tu clave pública de Stripe)
+            initializeStripe();
+            
+            // Configurar eventos táctiles
+            setupTouchEvents();
+            
+            // Configurar el idioma
+            setLanguage(currentLanguage);
+            
+            // Configurar evento para el botón de pago en efectivo
+            document.getElementById('cash-button').addEventListener('click', processCashPayment);
+            
+            // Seleccionar efectivo por defecto
+            selectPaymentMethod('cash');
+        });
+        
+        function loadCart() {
+            const savedCart = localStorage.getItem('currentCart');
+            const savedTotal = localStorage.getItem('cartTotal');
+            const instructions = localStorage.getItem('orderInstructions') || translations[currentLanguage]['no-instructions'];
+            
+            if (savedCart && savedTotal) {
+                cart = JSON.parse(savedCart);
+                total = parseFloat(savedTotal);
+                updateOrderSummary();
+                
+                // Mostrar instrucciones especiales
+                document.getElementById('order-instructions').textContent = instructions;
+            } else {
+                // Si no hay datos, mostrar mensaje
+                document.getElementById('order-items').innerHTML = '<div class="order-item">' + translations[currentLanguage]['empty-cart'] + '</div>';
+            }
+        }
+        
+        function initializeStripe() {
+            stripe = Stripe('pk_test_your_key'); // Reemplaza con tu clave pública de Stripe
+            const elements = stripe.elements();
+            
+            // Estilo personalizado para el elemento de la tarjeta
+            const cardStyle = {
+                base: {
+                    color: '#1E1E1E',
+                    fontFamily: '"Jost", sans-serif',
+                    fontSmoothing: 'antialiased',
+                    fontSize: '16px',
+                    '::placeholder': {
+                        color: '#a8a8a8'
+                    }
+                },
+                invalid: {
+                    color: '#dc3545',
+                    iconColor: '#dc3545'
+                }
+            };
+            
+            cardElement = elements.create('card', {
+                style: cardStyle,
+                hidePostalCode: true
+            });
+            
+            cardElement.mount('#card-element');
+            
+            // Escuchar cambios en el elemento de la tarjeta
+            cardElement.on('change', function(event) {
+                const displayError = document.getElementById('card-errors');
+                if (event.error) {
+                    displayError.textContent = event.error.message;
+                    document.getElementById('pay-button').disabled = true;
+                } else {
+                    displayError.textContent = '';
+                    document.getElementById('pay-button').disabled = !event.complete;
+                }
+            });
+        }
+        
+        function setupTouchEvents() {
+            // Mejorar la usabilidad táctil de los radio buttons
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.addEventListener('touchstart', function() {
+                    this.classList.add('active-touch');
+                });
+                
+                option.addEventListener('touchend', function() {
+                    this.classList.remove('active-touch');
+                    const inputId = this.getAttribute('for');
+                    if (inputId) {
+                        document.getElementById(inputId).click();
+                    }
+                });
+            });
+            
+            // Prevenir zoom de doble toque
+            document.addEventListener('dblclick', function(e) {
+                e.preventDefault();
+            }, { passive: false });
+            
+            // Mejorar el feedback táctil para botones
+            document.querySelectorAll('.button').forEach(button => {
+                button.addEventListener('touchstart', function() {
+                    this.classList.add('button-touch');
+                });
+                
+                button.addEventListener('touchend', function() {
+                    this.classList.remove('button-touch');
+                });
+            });
+        }
+        
+        // Función para cambiar el idioma
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('selectedLanguage', lang);
+            
+            // Actualizar textos
+            Object.keys(translations[lang]).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+            
+            // Actualizar elementos adicionales
+            document.getElementById('processing-text').textContent = translations[lang]['processing'];
+            document.querySelector('.instructions-label').textContent = translations[lang]['instructions-label'];
+            
+            // Actualizar selector de idioma
+            document.getElementById('esLang').classList.toggle('active', lang === 'es');
+            document.getElementById('enLang').classList.toggle('active', lang === 'en');
+            
+            // Actualizar atributo lang del documento
+            document.documentElement.lang = lang;
+            
+            // Actualizar instrucciones si no hay
+            const instructions = localStorage.getItem('orderInstructions');
+            document.getElementById('order-instructions').textContent = 
+                instructions || translations[lang]['no-instructions'];
+        }
+        
+        // Función para actualizar el resumen del pedido
+        function updateOrderSummary() {
+            const orderItemsContainer = document.getElementById('order-items');
+            const orderTotal = document.getElementById('order-total');
+            
+            orderItemsContainer.innerHTML = '';
+            
+            if (cart.length === 0) {
+                orderItemsContainer.innerHTML = '<div class="order-item">' + translations[currentLanguage]['empty-cart'] + '</div>';
+                orderTotal.textContent = '$0.00';
+                return;
+            }
+            
+            cart.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'order-item';
+                itemElement.innerHTML = `
+                    <div class="order-item-name">
+                        <span class="order-item-quantity">${item.quantity}x</span> ${item.name}
+                    </div>
+                    <div class="order-item-price">$${(item.price * item.quantity).toFixed(2)}</div>
+                `;
+                orderItemsContainer.appendChild(itemElement);
+            });
+            
+            orderTotal.textContent = `$${total.toFixed(2)}`;
+        }
+        
+        // Función para seleccionar método de pago
+        function selectPaymentMethod(method) {
+            // Actualizar los radio buttons
+            document.getElementById('cash-method').checked = method === 'cash';
+            document.getElementById('card-method').checked = method === 'card';
+            
+            // Resaltar la opción seleccionada
+            document.querySelectorAll('.payment-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            if (method === 'cash') {
+                document.querySelector('#cash-method').parentElement.classList.add('selected');
+                document.getElementById('card-details').classList.remove('active');
+                document.getElementById('cash-button').classList.add('active');
+            } else {
+                document.querySelector('#card-method').parentElement.classList.add('selected');
+                document.getElementById('card-details').classList.add('active');
+                document.getElementById('cash-button').classList.remove('active');
+            }
+        }
+        
+        // Event listeners para los métodos de pago
+        document.getElementById('cash-method').addEventListener('change', function() {
+            if (this.checked) selectPaymentMethod('cash');
+        });
+        
+        document.getElementById('card-method').addEventListener('change', function() {
+            if (this.checked) selectPaymentMethod('card');
+        });
+        
+        // Función para procesar el pago con tarjeta
+        document.getElementById('pay-button').addEventListener('click', processPayment);
+        
+        // Función para procesar el pago en efectivo
+        function processCashPayment() {
+
+                // Limpiar el carrito
+                localStorage.removeItem('currentCart');
+                localStorage.removeItem('cartTotal');
+                localStorage.removeItem('orderInstructions');
+                
+                // Redirigir a la página de agradecimiento
+                window.location.href = 'gracias.html';
+
+        }
+        
+        async function processPayment() {
+            const payButton = document.getElementById('pay-button');
+            const payButtonText = document.getElementById('pay-button-text');
+            const payButtonLoading = document.getElementById('pay-button-loading');
+            
+            // Mostrar estado de carga
+            payButtonText.style.display = 'none';
+            payButtonLoading.style.display = 'inline';
+            payButton.disabled = true;
+            
+            try {
+                // Crear el token de pago con Stripe
+                const { paymentMethod, error } = await stripe.createPaymentMethod({
+                    type: 'card',
+                    card: cardElement,
+                });
+                
+                if (error) {
+                    document.getElementById('card-errors').textContent = error.message;
+                    payButtonText.style.display = 'inline';
+                    payButtonLoading.style.display = 'none';
+                    payButton.disabled = false;
+                    return;
+                }
+                
+                // Simular un retraso en el procesamiento
+                setTimeout(() => {
+                    alert(translations[currentLanguage]['payment-success']);
+                    
+                    // Limpiar el carrito
+                    localStorage.removeItem('currentCart');
+                    localStorage.removeItem('cartTotal');
+                    localStorage.removeItem('orderInstructions');
+                    
+                    // Redirigir a la página de agradecimiento
+                    window.location.href = 'gracias.html';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert(translations[currentLanguage]['payment-error']);
+                payButtonText.style.display = 'inline';
+                payButtonLoading.style.display = 'none';
+                payButton.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

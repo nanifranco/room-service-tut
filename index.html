@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;700&family=Avenir+Next+Condensed:wght@400;500;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Room Service | TÜT Café</title>
+  <style>
+    :root {
+      --verde-oscuro: #5E6E54;
+      --beige: #ECEBDD;
+      --gris-claro: #d6d6d6;
+      --negro: #1e1e1e;
+      --blanco: #ffffff;
+      --rojo-error: #d32f2f;
+      --acento: #A78A7F;
+      font-size: 16px;
+    }
+    
+    @media (max-width: 480px) {
+      :root {
+        font-size: 14px;
+      }
+    }
+    
+    body {
+      font-family: 'Jost', sans-serif;
+      background-color: var(--beige);
+      color: var(--negro);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    /* Animaciones */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes fadeZoom {
+      0% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      70% {
+        opacity: 1;
+        transform: scale(1.4);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(1.4);
+      }
+    }
+    
+    .language-selector {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      font-family: 'Avenir Next Condensed', sans-serif;
+      z-index: 100;
+      animation: fadeIn 0.8s ease-out 0.5s both;
+    }
+    
+    .language-selector span {
+      font-size: 0.9rem;
+      color: var(--negro);
+      background: rgba(236, 235, 221, 0.9);
+      padding: 0.3rem 0.75rem;
+      border-radius: 1.25rem;
+      border: 1px dashed var(--verde-oscuro);
+      font-weight: 500;
+    }
+    
+    .language-selector a {
+      text-decoration: none;
+      color: var(--verde-oscuro);
+      font-weight: 700;
+      margin: 0 0.25rem;
+      transition: all 0.2s ease;
+    }
+    
+    .language-selector a.active {
+      color: var(--negro);
+      text-decoration: underline;
+    }
+    
+    .language-selector a:hover {
+      color: var(--negro);
+      text-decoration: underline;
+    }
+    
+    .corner-logo {
+      position: absolute;
+      top: 1.25rem;
+      left: 1.25rem;
+      width: 3.5rem;
+      z-index: 100;
+      animation: fadeIn 0.8s ease-out 0.5s both;
+    }
+    
+    .container {
+      width: 90%;
+      max-width: 25rem;
+      margin: 6rem auto 2.5rem;
+      padding: 2rem;
+      border-radius: 1.5rem;
+      background: var(--blanco);
+      box-shadow: 0 0.5rem 1.5rem rgba(94, 110, 84, 0.15);
+      display: none;
+      animation: fadeIn 0.8s ease-out both;
+      border: 1px dashed rgba(94, 110, 84, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .container::before {
+      content: "";
+      position: absolute;
+      top: -10px;
+      left: -10px;
+      right: -10px;
+      bottom: -10px;
+      border: 2px dashed rgba(94, 110, 84, 0.1);
+      border-radius: 1.75rem;
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    h1 {
+      font-family: 'Avenir Next Condensed', sans-serif;
+      font-size: 2rem;
+      color: var(--verde-oscuro);
+      margin: 1.5rem 0 1.5rem 0;
+      text-transform: uppercase;
+      letter-spacing: 0.125rem;
+      text-align: center;
+      font-weight: 700;
+      position: relative;
+      animation: fadeIn 0.8s ease-out 0.3s both;
+    }
+    
+    h1::after {
+      content: "";
+      display: block;
+      width: 3rem;
+      height: 3px;
+      background: var(--acento);
+      margin: 0.5rem auto;
+      border-radius: 3px;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+      text-align: left;
+      animation: fadeIn 0.8s ease-out 0.4s both;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--verde-oscuro);
+      font-family: 'Avenir Next Condensed', sans-serif;
+      letter-spacing: 0.05rem;
+    }
+    
+    input {
+      width: 100%;
+      padding: 0.9rem;
+      border: 1px dashed var(--verde-oscuro);
+      border-radius: 0.75rem;
+      font-size: 1rem;
+      font-family: 'Jost', sans-serif;
+      background-color: rgba(236, 235, 221, 0.3);
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: var(--verde-oscuro);
+      background-color: var(--blanco);
+      box-shadow: 0 0 0 2px rgba(94, 110, 84, 0.2);
+    }
+    
+    input::placeholder {
+      color: rgba(94, 110, 84, 0.5);
+      font-style: italic;
+      font-weight: 300;
+    }
+    
+    .submit-room-info {
+      width: 100%;
+      background: var(--verde-oscuro);
+      color: var(--beige);
+      border: none;
+      padding: 1rem;
+      font-family: 'Avenir Next Condensed', sans-serif;
+      border-radius: 0.75rem;
+      font-size: 1.1rem;
+      margin-top: 0.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 700;
+      letter-spacing: 0.05rem;
+      text-transform: uppercase;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 0.8s ease-out 0.5s both;
+    }
+    
+    .submit-room-info:hover {
+      background: #4a5a42;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(94, 110, 84, 0.3);
+    }
+    
+    .submit-room-info:active {
+      transform: translateY(0);
+    }
+    
+    #intro {
+      position: fixed;
+      inset: 0;
+      background-color: var(--beige);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 1000;
+    }
+    
+    #intro img {
+      width: 12.5rem;
+      animation: fadeZoom 2s ease-in-out forwards;
+    }
+    
+    .form-logo {
+      width: 5rem;
+      height: auto;
+      object-fit: contain;
+      animation: float 4s ease-in-out infinite;
+    }
+    
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      animation: fadeIn 0.8s ease-out 0.2s both;
+    }
+    
+    /* Estilos para mensajes de error */
+    .error-message {
+      color: var(--rojo-error);
+      font-size: 0.8rem;
+      margin-top: 0.3rem;
+      display: none;
+      font-weight: 500;
+    }
+    
+    .error-input {
+      border-color: var(--rojo-error) !important;
+      background-color: rgba(211, 47, 47, 0.05) !important;
+    }
+    
+    /* Banner de error minimalista */
+    .error-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(30, 30, 30, 0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+    
+    .error-banner {
+      background: var(--blanco);
+      padding: 1.2rem 1.8rem;
+      border-radius: 0.8rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      border: 1px solid rgba(94, 110, 84, 0.1);
+      max-width: 80%;
+      text-align: center;
+    }
+    
+    @keyframes scaleIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    .error-icon {
+      font-size: 1.8rem;
+      color: var(--verde-oscuro);
+      margin-bottom: 0.3rem;
+    }
+    
+    .error-title {
+      font-family: 'Avenir Next Condensed', sans-serif;
+      color: var(--negro);
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin: 0;
+    }
+    
+    .error-message-banner {
+      font-family: 'Jost', sans-serif;
+      color: var(--negro);
+      font-size: 0.9rem;
+      margin: 0;
+      opacity: 0.8;
+    }
+    
+    /* Media Queries */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1.8rem;
+        margin: 1.2rem 0;
+      }
+      
+      .container {
+        margin-top: 5rem;
+        padding: 1.5rem;
+      }
+      
+      .form-logo {
+        width: 4.5rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.6rem;
+        margin: 1rem 0;
+      }
+      
+      .container {
+        margin-top: 4rem;
+        width: 95%;
+        padding: 1.2rem;
+      }
+      
+      .form-logo {
+        width: 4rem;
+      }
+      
+      input, .submit-room-info {
+        padding: 0.9rem;
+      }
+      
+      .language-selector {
+        top: 1rem;
+        right: 1rem;
+      }
+      
+      .language-selector span {
+        padding: 0.25rem 0.6rem;
+        font-size: 0.8rem;
+      }
+      
+      .error-banner {
+        padding: 1rem 1.5rem;
+        max-width: 85%;
+      }
+      
+      .error-icon {
+        font-size: 1.5rem;
+      }
+      
+      .error-title {
+        font-size: 1rem;
+      }
+      
+      .error-message-banner {
+        font-size: 0.85rem;
+      }
+    }
+    
+    @media (max-width: 360px) {
+      h1 {
+        font-size: 1.4rem;
+      }
+      
+      .form-group {
+        margin-bottom: 1.2rem;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+  <div id="intro">
+    <img src="https://i.postimg.cc/c1fFYTkf/IMG-DF9085-C9-D930-1-removebg-preview-removebg-preview.png" alt="TÜT Café Logo" />
+  </div>
+  
+  <div class="container">    
+    <div class="header-container">
+      <img src="https://i.postimg.cc/y8j5RndL/Screenshot-2025-06-18-at-10-32-47-a-m.png" class="form-logo" alt="TÜT Café Logo" />
+      <div class="language-selector" style="position: static;">
+        <span><a href="#" id="esLang" class="active" onclick="setLanguage('es')">ES</a> | <a href="#" id="enLang" onclick="setLanguage('en')">EN</a></span>
+      </div>
+    </div>
+    
+    <h1 id="title">ROOM SERVICE</h1>
+    
+    <form id="roomServiceForm">
+      <div class="form-group">
+        <label id="roomLabel">NÚMERO DE HABITACIÓN*</label>
+        <input type="number" id="roomNumber" placeholder="Ej: 205" inputmode="numeric" />
+        <div id="roomNumberError" class="error-message">Este campo es obligatorio</div>
+      </div>
+      
+      <div class="form-group">
+        <label id="lastNameLabel">APELLIDO*</label>
+        <input type="text" id="lastName" placeholder="Tu apellido" />
+        <div id="lastNameError" class="error-message">Este campo es obligatorio</div>
+      </div>
+      
+      <button type="button" class="submit-room-info" id="submitButton" onclick="validateForm()">CONTINUAR</button>
+    </form>
+  </div>
+  
+  <script>
+    // Base de datos ficticia de habitaciones y apellidos
+    const database = [
+      { roomNumber: 101, lastName: "GARCIA" },
+      { roomNumber: 205, lastName: "RODRIGUEZ" },
+      { roomNumber: 312, lastName: "MARTINEZ" },
+      { roomNumber: 408, lastName: "LOPEZ" },
+      { roomNumber: 520, lastName: "PEREZ" }
+    ];
+    
+    // Textos en diferentes idiomas
+    const translations = {
+      es: {
+        title: "ROOM SERVICE",
+        roomLabel: "NÚMERO DE HABITACIÓN*",
+        roomPlaceholder: "Ej: 205",
+        roomError: "Este campo es obligatorio",
+        lastNameLabel: "APELLIDO*",
+        lastNamePlaceholder: "Tu apellido",
+        lastNameError: "Este campo es obligatorio",
+        submitButton: "CONTINUAR",
+        errorTitle: "Datos incorrectos",
+        errorMessage: "Por favor verifica tu información"
+      },
+      en: {
+        title: "ROOM SERVICE",
+        roomLabel: "ROOM NUMBER*",
+        roomPlaceholder: "Ex: 205",
+        roomError: "This field is required",
+        lastNameLabel: "LAST NAME*",
+        lastNamePlaceholder: "Your last name",
+        lastNameError: "This field is required",
+        submitButton: "CONTINUE",
+        errorTitle: "Incorrect data",
+        errorMessage: "Please verify your information"
+      }
+    };
+    
+    // Establecer idioma por defecto
+    let currentLanguage = localStorage.getItem('selectedLanguage') || 'es';
+    
+    window.addEventListener('load', () => {
+      const intro = document.getElementById('intro');
+      
+      // Aplicar idioma guardado al cargar
+      setLanguage(currentLanguage);
+      
+      setTimeout(() => {
+        intro.style.display = 'none';
+        document.querySelector('.container').style.display = 'block';
+      }, 2000);
+    });
+    
+    function setLanguage(lang) {
+      currentLanguage = lang;
+      localStorage.setItem('selectedLanguage', lang);
+      
+      // Actualizar textos
+      document.getElementById('title').textContent = translations[lang].title;
+      document.getElementById('roomLabel').textContent = translations[lang].roomLabel;
+      document.getElementById('roomNumber').placeholder = translations[lang].roomPlaceholder;
+      document.getElementById('roomNumberError').textContent = translations[lang].roomError;
+      document.getElementById('lastNameLabel').textContent = translations[lang].lastNameLabel;
+      document.getElementById('lastName').placeholder = translations[lang].lastNamePlaceholder;
+      document.getElementById('lastNameError').textContent = translations[lang].lastNameError;
+      document.getElementById('submitButton').textContent = translations[lang].submitButton;
+      
+      // Actualizar selector de idioma
+      document.getElementById('esLang').classList.toggle('active', lang === 'es');
+      document.getElementById('enLang').classList.toggle('active', lang === 'en');
+      
+      // Cambiar atributo lang del documento
+      document.documentElement.lang = lang;
+    }
+    
+    function showErrorBanner() {
+      // Crear el overlay y el banner minimalista
+      const overlay = document.createElement('div');
+      overlay.className = 'error-overlay';
+      
+      overlay.innerHTML = `
+        <div class="error-banner">
+          <i class="fas fa-exclamation-circle error-icon"></i>
+          <h4 class="error-title">${translations[currentLanguage].errorTitle}</h4>
+          <p class="error-message-banner">${translations[currentLanguage].errorMessage}</p>
+        </div>
+      `;
+      
+      document.body.appendChild(overlay);
+      
+      // Cerrar automáticamente después de 4 segundos
+      setTimeout(() => {
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 300);
+      }, 4000);
+      
+      // Cerrar al hacer clic en cualquier parte
+      overlay.addEventListener('click', () => {
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 300);
+      });
+    }
+    
+    function validateForm() {
+      let isValid = true;
+      const roomNumber = document.getElementById('roomNumber').value.trim();
+      const lastName = document.getElementById('lastName').value.trim().toUpperCase();
+      
+      // Validar número de habitación
+      if (roomNumber === '') {
+        document.getElementById('roomNumberError').style.display = 'block';
+        document.getElementById('roomNumber').classList.add('error-input');
+        isValid = false;
+      } else {
+        document.getElementById('roomNumberError').style.display = 'none';
+        document.getElementById('roomNumber').classList.remove('error-input');
+      }
+      
+      // Validar apellido
+      if (lastName === '') {
+        document.getElementById('lastNameError').style.display = 'block';
+        document.getElementById('lastName').classList.add('error-input');
+        isValid = false;
+      } else {
+        document.getElementById('lastNameError').style.display = 'none';
+        document.getElementById('lastName').classList.remove('error-input');
+      }
+      
+      if (!isValid) return;
+      
+      // Verificar en la base de datos
+      const roomNum = parseInt(roomNumber);
+      const found = database.some(entry => 
+        entry.roomNumber === roomNum && entry.lastName === lastName
+      );
+      
+      if (found) {
+        // Datos correctos - Redirigir a room_service.html con el idioma
+        window.location.href = 'menu.html?lang=' + currentLanguage;
+      } else {
+        // Datos incorrectos
+        showErrorBanner();
+        document.getElementById('roomNumber').classList.add('error-input');
+        document.getElementById('lastName').classList.add('error-input');
+      }
+    }
+  </script>
+</body>
+</html>

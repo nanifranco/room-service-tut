@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gracias | TÜT Café</title>
+
+  <!-- Tipografías del brandbook -->
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;700&family=Avenir+Next+Condensed:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --verde-oscuro: #5E6E54;
+      --beige: #ECEBDD;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Jost', sans-serif;
+      background-color: var(--beige);
+      color: var(--verde-oscuro);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+      min-height: 100vh;
+      padding: 40px 20px;
+      overflow-y: auto;
+    }
+
+    .imagen {
+      max-width: 220px;
+      width: 60%;
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      font-family: 'Avenir Next Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 2.8rem;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    p {
+      font-size: 1.2rem;
+      text-align: center;
+      max-width: 500px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 2.2rem;
+      }
+
+      p {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <img src="https://i.postimg.cc/HkSfycb9/Screenshot-2025-06-20-at-2-50-46-p-m.png" alt="Gracias TÜT" class="imagen" />
+  <h1>¡Gracias!</h1>
+  <p>Llevaremos tu pedido lo más pronto posible.<br />We’ll deliver your order as soon as possible.</p>
+</body>
+</html>
